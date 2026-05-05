@@ -1,0 +1,3 @@
+COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    48291  ali   23u  IPv6 0x12345abcd      0t0  TCP *:3000 (LISTEN)
+node    48291  ali   24u  IPv4 0xfedcba987      0t0  TCP *:3000 (LISTEN)

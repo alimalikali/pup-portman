@@ -1,0 +1,65 @@
+{
+  "name": "pup-portman",
+  "version": "0.1.0",
+  "description": "Cross-platform CLI to find and kill processes on any port. Zero dependencies.",
+  "type": "module",
+  "bin": {
+    "pup-portman": "bin/pup-portman.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\"",
+    "test:e2e": "node --test \"test/e2e/**/*.test.js\"",
+    "test:all": "npm run test && npm run test:e2e",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "prepublishOnly": "node scripts/verify-publish.js && npm run check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "20.19.39",
+    "eslint": "^9.0.0",
+    "simple-git-hooks": "^2.0.0",
+    "typescript": "^5.0.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npm run lint && npm run typecheck"
+  },
+  "keywords": [
+    "port",
+    "kill",
+    "cli",
+    "lsof",
+    "netstat",
+    "ss",
+    "taskkill",
+    "process",
+    "devtools",
+    "cross-platform",
+    "zero-dependencies"
+  ],
+  "author": "Ali Malik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alimalik/pup-portman.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alimalik/pup-portman/issues"
+  },
+  "homepage": "https://github.com/alimalik/pup-portman#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

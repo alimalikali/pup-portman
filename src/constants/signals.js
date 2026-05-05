@@ -1,0 +1,3 @@
+export const SIGNALS_TO_HANDLE = ['SIGINT', 'SIGTERM', 'SIGHUP']
+export const GRACEFUL_SIGNAL = 'SIGTERM'
+export const FORCE_SIGNAL = 'SIGKILL'

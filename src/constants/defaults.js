@@ -1,0 +1,9 @@
+export const WATCH_INTERVAL_MS = 500
+export const WATCH_MAX_TICKS = Infinity
+export const PORT_MIN = 1
+export const PORT_MAX = 65535
+export const PRIVILEGED_PORT_MAX = 1023
+export const STORE_FILENAME = 'projects.json'
+export const STORE_DIRNAME = '.pup-portman'
+export const KILL_GRACE_MS = 2000
+export const EXEC_DEFAULT_TIMEOUT_MS = 10_000
