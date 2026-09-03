@@ -33,3 +33,9 @@ test('list (text) renders a table', async () => {
   assert.match(/** @type {any} */ (ctx.stdout).text, /3000/)
   assert.match(/** @type {any} */ (ctx.stdout).text, /node/)
 })
+
+test('list surfaces project store errors', async () => {
+  const failure = Object.assign(new Error('corrupt'), { code: 'ERR_STORE_CORRUPT' })
+  const ctx = makeCtx({ store: /** @type {any} */ ({ list: async () => { throw failure } }) })
+  await assert.rejects(list(parseArgv(['list']), ctx), failure)
+})

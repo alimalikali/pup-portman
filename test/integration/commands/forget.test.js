@@ -36,8 +36,7 @@ test('forget unknown name returns NOT_FOUND', async () => {
 })
 
 test('forget without name => USAGE', async () => {
-  const ctx = makeCtx()
-  await assert.rejects(forget(parseArgv(['forget']), ctx), (err) => err.code === 'ERR_MISSING_NAME')
+  assert.throws(() => parseArgv(['forget']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
 })
 
 test('forget --json emits structured result', async () => {

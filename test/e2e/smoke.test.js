@@ -46,11 +46,16 @@ test('no args => help + exit 2', async () => {
 test('unknown verb => help + exit 2', async () => {
   const r = await run(['frobnicate'])
   assert.equal(r.code, 2)
-  assert.match(r.stdout, /unknown command/)
+  assert.match(r.stderr, /unknown command/)
+  assert.match(r.stdout, /USAGE/)
 })
 
-test('list --json on real OS returns JSON', async () => {
+test('list --json on real OS returns JSON', async (t) => {
   const r = await run(['list', '--json'])
+  if (r.code === 5 && /not found on PATH/.test(r.stderr)) {
+    t.skip('required platform inspection tool is unavailable')
+    return
+  }
   assert.equal(r.code, 0)
   const parsed = JSON.parse(r.stdout)
   assert.ok(Array.isArray(parsed.occupied))
@@ -63,10 +68,14 @@ test('invalid port => exit 2', async () => {
   assert.match(r.stderr, /Port must be an integer/)
 })
 
-test('kill on a port nobody owns => not-found exit 3', async () => {
+test('kill on a port nobody owns => not-found exit 3', async (t) => {
   // Use 1 (privileged port likely not owned by us). Behavior on macOS/Windows may
   // surface different ports; pick something exotic to lower collision odds.
   const r = await run(['kill', '65530'])
+  if (r.code === 5 && /not found on PATH/.test(r.stderr)) {
+    t.skip('required platform inspection tool is unavailable')
+    return
+  }
   // 3 = not-found; 4 = permission (if something is there and we can't kill).
   assert.ok([3, 4].includes(r.code), `expected exit 3 or 4 got ${r.code} (stderr=${r.stderr})`)
 })

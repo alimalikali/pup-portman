@@ -33,7 +33,7 @@ export function createWindowsAdapter(exec) {
 async function enrichWithTasklist(exec, rows) {
   /** @type {Map<number, string>} */
   const cache = new Map()
-  const uniquePids = [...new Set(rows.map((r) => r.pid).filter((p) => p > 0))]
+  const uniquePids = [...new Set(rows.map((r) => r.pid).filter((p) => p != null && p > 0))]
 
   await Promise.all(uniquePids.map(async (pid) => {
     try {
@@ -44,7 +44,7 @@ async function enrichWithTasklist(exec, rows) {
   }))
 
   for (const r of rows) {
-    if (r.command === 'unknown' && cache.has(r.pid)) {
+    if (r.pid != null && r.command === 'unknown' && cache.has(r.pid)) {
       r.command = /** @type {string} */ (cache.get(r.pid))
     }
   }

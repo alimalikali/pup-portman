@@ -56,3 +56,18 @@ test('inspect: invalid port (manually invoked) throws InvalidPortError', async (
     (err) => err.code === 'ERR_INVALID_PORT'
   )
 })
+
+test('inspect: unavailable PID is displayed and never prompts', async () => {
+  let prompts = 0
+  const ctx = makeCtx({
+    adapter: {
+      name: 'linux',
+      findByPort: async () => [{ pid: null, command: 'unknown', port: 3000, protocol: 'tcp', family: 'ipv4' }],
+      listAll: async () => []
+    },
+    prompt: async () => { prompts++; return true }
+  })
+  await assert.rejects(inspect(parseArgv(['3000']), ctx), (err) => err.code === 'ERR_PERMISSION_DENIED')
+  assert.equal(prompts, 0)
+  assert.match(/** @type {any} */ (ctx.stdout).text, /unavailable/)
+})

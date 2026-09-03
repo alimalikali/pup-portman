@@ -88,3 +88,25 @@ test('-- terminator stops flag parsing', () => {
 test('non-array argv throws', () => {
   assert.throws(() => parseArgv(/** @type {any} */ ('not array')), /must be an array/)
 })
+
+test('rejects unknown flags without consuming arguments', () => {
+  assert.throws(() => parseArgv(['kill', '3000', '--froce']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
+})
+
+test('rejects extra positional arguments', () => {
+  assert.throws(() => parseArgv(['kill', '3000', 'unexpected']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
+})
+
+test('rejects unsupported command flags', () => {
+  assert.throws(() => parseArgv(['list', '--force']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
+})
+
+test('rejects values on boolean flags and malformed intervals', () => {
+  assert.throws(() => parseArgv(['list', '--json=true']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
+  assert.throws(() => parseArgv(['watch', '3000', '--interval', 'soon']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
+})
+
+test('removes only the command verb from positionals', () => {
+  const r = parseArgv(['save', '3000', 'save'])
+  assert.deepEqual(r.positionals, ['3000', 'save'])
+})

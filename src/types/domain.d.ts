@@ -1,5 +1,6 @@
 export interface ProcessInfo {
-  pid: number
+  /** Null when the OS reports a listener but hides its owner. */
+  pid: number | null
   command: string
   port: number
   protocol: 'tcp' | 'udp'

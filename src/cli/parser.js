@@ -1,6 +1,8 @@
 /**
  * @typedef {import('../types/domain.js').ParsedArgs} ParsedArgs
  */
+import { PortmanError } from '../errors/base.js'
+import { EXIT_CODES } from '../constants/exit-codes.js'
 
 /** Verbs the parser knows about. */
 const VERBS = new Set([
@@ -9,8 +11,26 @@ const VERBS = new Set([
 
 /** Boolean flags. */
 const BOOL_FLAGS = new Set([
-  'help', 'version', 'json', 'no-color', 'no-beep', 'yes', 'force', 'all'
+  'help', 'version', 'json', 'no-color', 'no-beep', 'yes', 'force'
 ])
+const VALUE_FLAGS = new Set(['interval'])
+/** @type {Record<string, Set<string>>} */
+const COMMAND_FLAGS = {
+  inspect: new Set(['json', 'no-color', 'yes', 'force']),
+  kill: new Set(['json', 'no-color', 'yes', 'force']),
+  list: new Set(['json', 'no-color']),
+  watch: new Set(['json', 'no-color', 'no-beep', 'interval']),
+  save: new Set(['json', 'no-color', 'force']),
+  projects: new Set(['json', 'no-color']),
+  forget: new Set(['json', 'no-color']),
+  help: new Set(['no-color', 'help']),
+  version: new Set(['version'])
+}
+/** @type {Record<string, number>} */
+const POSITIONAL_COUNTS = {
+  inspect: 1, kill: 1, list: 0, watch: 1, save: 2,
+  projects: 0, forget: 1, help: 0, version: 0
+}
 
 /** Short flag aliases.
  * @type {Record<string, string>}
@@ -58,20 +78,21 @@ export function parseArgv(argv) {
       const eq = token.indexOf('=')
       if (eq !== -1) {
         const name = token.slice(2, eq)
-        flags[name] = token.slice(eq + 1)
+        if (!VALUE_FLAGS.has(name)) usageError(`Flag --${name} does not accept a value.`)
+        const value = token.slice(eq + 1)
+        if (value.length === 0) usageError(`Flag --${name} requires a value.`)
+        flags[name] = value
       } else {
         const name = token.slice(2)
         if (BOOL_FLAGS.has(name)) {
           flags[name] = true
-        } else {
-          // Unknown flag: take the next token as value if it doesn't start with -.
+        } else if (VALUE_FLAGS.has(name)) {
           const next = argv[i + 1]
-          if (next != null && !next.startsWith('-')) {
-            flags[name] = next
-            i++
-          } else {
-            flags[name] = true
-          }
+          if (next == null || next.startsWith('-')) usageError(`Flag --${name} requires a value.`)
+          flags[name] = next
+          i++
+        } else {
+          usageError(`Unknown flag --${name}.`)
         }
       }
       continue
@@ -83,7 +104,7 @@ export function parseArgv(argv) {
       for (const ch of cluster) {
         const long = SHORT[ch]
         if (long) flags[long] = true
-        else flags[ch] = true
+        else usageError(`Unknown flag -${ch}.`)
       }
       continue
     }
@@ -92,13 +113,47 @@ export function parseArgv(argv) {
   }
 
   const verb = resolveVerb(positionals, flags)
+  const commandPositionals = (flags.help === true || flags.version === true)
+    ? []
+    : (VERBS.has(positionals[0]) ? positionals.slice(1) : positionals.slice())
+  validateCommand(verb, commandPositionals, flags)
 
   return {
     verb,
-    positionals: positionals.filter((p) => p !== verb),
+    positionals: commandPositionals,
     flags,
     raw: argv.slice()
   }
+}
+
+/**
+ * @param {string} verb
+ * @param {string[]} positionals
+ * @param {Record<string, boolean | string>} flags
+ */
+function validateCommand(verb, positionals, flags) {
+  if (flags.unknownVerb) return
+  const allowed = COMMAND_FLAGS[verb]
+  for (const flag of Object.keys(flags)) {
+    if (flag === 'empty') continue
+    if (!allowed?.has(flag)) usageError(`Flag --${flag} is not supported by ${verb}.`)
+  }
+  const expected = POSITIONAL_COUNTS[verb]
+  if (expected != null && positionals.length !== expected) {
+    usageError(`${verb} expects ${expected} argument${expected === 1 ? '' : 's'}; received ${positionals.length}.`)
+  }
+  if (verb === 'watch' && typeof flags.interval === 'string' && !/^\d+$/.test(flags.interval)) {
+    usageError('--interval must be a positive integer in milliseconds.')
+  }
+}
+
+/** @param {string} message @returns {never} */
+function usageError(message) {
+  throw new PortmanError(message, {
+    code: 'ERR_INVALID_ARGUMENTS',
+    exitCode: EXIT_CODES.USAGE,
+    userMessage: `${message} Run "pup-portman --help" for usage.`
+  })
 }
 
 /**

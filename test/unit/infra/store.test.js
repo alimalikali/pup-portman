@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { stat, writeFile } from 'node:fs/promises'
+import { stat, writeFile, readdir } from 'node:fs/promises'
 import { makeTmpStore } from '../../helpers/tmp-store.js'
 
 const isWindows = process.platform === 'win32'
@@ -120,6 +120,19 @@ test('load filters bad entries silently', async () => {
     const entries = await t.store.load()
     assert.equal(entries.length, 1)
     assert.equal(entries[0].name, 'good')
+  } finally {
+    await t.cleanup()
+  }
+})
+
+test('concurrent saves do not lose updates or leak lock files', async () => {
+  const t = await makeTmpStore()
+  try {
+    await Promise.all(Array.from({ length: 12 }, (_, i) => t.store.save(3000 + i, `project-${i}`)))
+    const entries = await t.store.list()
+    assert.equal(entries.length, 12)
+    assert.deepEqual(entries.map((e) => e.name).sort(), Array.from({ length: 12 }, (_, i) => `project-${i}`).sort())
+    assert.deepEqual((await readdir(t.dir)).filter((name) => name.endsWith('.lock') || name.endsWith('.tmp')), [])
   } finally {
     await t.cleanup()
   }

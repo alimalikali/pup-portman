@@ -16,7 +16,7 @@ export async function list(parsed, ctx) {
 
   const [occupied, saved] = await Promise.all([
     ctx.adapter.listAll(),
-    ctx.store.list().catch(() => [])
+    ctx.store.list()
   ])
 
   if (json) {

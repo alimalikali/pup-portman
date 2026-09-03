@@ -6,7 +6,7 @@ export { InvalidPortError, PortNotFoundError, PortInUseError } from './port-erro
 export { PermissionDeniedError, NotOwnerError } from './permission-errors.js'
 export { UnsupportedPlatformError, ToolNotFoundError } from './platform-errors.js'
 export { ExecError, ExecTimeoutError } from './exec-errors.js'
-export { StoreCorruptError, DuplicateNameError } from './store-errors.js'
+export { StoreCorruptError, DuplicateNameError, StoreLockTimeoutError } from './store-errors.js'
 
 /**
  * Convert any thrown value into an exit code + user-facing message.

@@ -54,6 +54,7 @@ Requires Node.js 16 or higher. Works on macOS, Linux, and Windows.
 | `--json` | Output JSON instead of human-formatted text |
 | `--no-color` | Disable ANSI colors (also honors `NO_COLOR` env var) |
 | `--no-beep` | Disable terminal bell on `watch` |
+| `--interval <ms>` | Set the `watch` polling interval (minimum 50ms) |
 | `--yes`, `-y` | Skip confirmation prompts |
 | `--force` | Send SIGKILL immediately, skip graceful SIGTERM |
 
@@ -68,6 +69,15 @@ $ pup-portman list --json
   { "port": 5432, "pid": 1042, "command": "postgres", "protocol": "tcp", "family": "ipv4" }
 ]
 ```
+
+Destructive commands validate every flag and argument before doing work. After
+`kill`, pup-portman checks the port again and reports whether it is actually
+free. On Linux, a listener whose owner is hidden is reported with `"pid": null`;
+retry with elevated privileges if you need to terminate it.
+
+Project names are stored atomically in `~/.pup-portman/projects.json` (or the
+configured XDG/PUP_PORTMAN_HOME location), with cross-process locking so
+simultaneous `save` and `forget` commands cannot overwrite each other.
 
 ## Exit codes
 

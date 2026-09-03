@@ -28,7 +28,7 @@ test('parseSs: rows with empty Process column still surface the port', async () 
   const port631 = out.find((p) => p.port === 631)
   assert.ok(port631)
   assert.equal(port631.command, 'unknown')
-  assert.equal(port631.pid, 0)
+  assert.equal(port631.pid, null)
 })
 
 test('parseSs: parses both processes for a multi-bound port', async () => {

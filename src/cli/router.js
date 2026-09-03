@@ -2,6 +2,7 @@ import * as commands from '../commands/index.js'
 import { printHelp } from './help.js'
 import { printVersion } from './version.js'
 import { EXIT_CODES } from '../constants/exit-codes.js'
+import { createColor, shouldUseColor } from '../ui/color.js'
 
 /**
  * @typedef {object} CliContext
@@ -39,8 +40,14 @@ export async function route(parsed, ctx) {
     return EXIT_CODES.OK
   }
   if (parsed.verb === 'help') {
+    const color = createColor(shouldUseColor({
+      env: ctx.env,
+      stream: ctx.stdout,
+      disabled: parsed.flags['no-color'] === true
+    }))
     printHelp(ctx, {
-      unknownVerb: typeof parsed.flags.unknownVerb === 'string' ? parsed.flags.unknownVerb : undefined
+      unknownVerb: typeof parsed.flags.unknownVerb === 'string' ? parsed.flags.unknownVerb : undefined,
+      color
     })
     if (parsed.flags.unknownVerb || parsed.flags.empty) return EXIT_CODES.USAGE
     return EXIT_CODES.OK
