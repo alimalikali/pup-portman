@@ -1,6 +1,6 @@
 {
   "name": "pup-portman",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Cross-platform CLI to find and kill processes on any port. Zero dependencies.",
   "type": "module",
   "bin": {
