@@ -2,7 +2,6 @@
 
 > Cross-platform CLI to find and kill processes on any port. Zero dependencies.
 
-[![CI](https://github.com/alimalik/pup-portman/actions/workflows/ci.yml/badge.svg)](https://github.com/alimalik/pup-portman/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/pup-portman.svg)](https://www.npmjs.com/package/pup-portman)
 [![Node.js](https://img.shields.io/node/v/pup-portman.svg)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
