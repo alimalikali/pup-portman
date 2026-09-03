@@ -8,7 +8,7 @@ test('help honors --no-color for a TTY stream', async () => {
   const ctx = makeCtx()
   ctx.stdout.isTTY = true
   await route(parseArgv(['--help', '--no-color']), ctx)
-  assert.doesNotMatch(ctx.stdout.text, /\x1b\[/)
+  assert.doesNotMatch(ctx.stdout.text, new RegExp(`${String.fromCharCode(27)}\\[`))
 })
 
 test('unknown command writes its diagnostic to stderr', async () => {

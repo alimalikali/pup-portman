@@ -10,10 +10,10 @@ export async function waitForPortRelease(port, opts) {
   const timeoutMs = opts.timeoutMs ?? PORT_RELEASE_TIMEOUT_MS
   const intervalMs = opts.intervalMs ?? PORT_RELEASE_INTERVAL_MS
   const deadline = Date.now() + timeoutMs
-  do {
+  for (;;) {
     const processes = await opts.adapter.findByPort(port)
     if (processes.length === 0) return { free: true, processes }
     if (Date.now() >= deadline) return { free: false, processes }
     await sleep(Math.min(intervalMs, Math.max(1, deadline - Date.now())))
-  } while (true)
+  }
 }

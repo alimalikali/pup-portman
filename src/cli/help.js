@@ -1,5 +1,8 @@
 import { color as defaultColor } from '../ui/color.js'
 
+/**
+ * @param {typeof defaultColor} color
+ */
 function renderHelp(color) {
   return `
 ${color.bold('pup-portman')} — kill anything on any port. Cross-platform. Zero deps.
