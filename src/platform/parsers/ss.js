@@ -43,7 +43,7 @@ export function parseSs(stdout, opts = {}) {
       // No process info available (likely lacking permission). Still surface the port
       // so the user knows it's occupied.
       out.push({
-        pid: 0,
+        pid: null,
         command: 'unknown',
         port,
         protocol: 'tcp',

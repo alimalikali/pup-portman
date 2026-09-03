@@ -25,8 +25,7 @@ test('save then projects round-trips via real ProjectStore', async () => {
 })
 
 test('save without name => USAGE error', async () => {
-  const ctx = makeCtx()
-  await assert.rejects(save(parseArgv(['save', '3000']), ctx), (err) => err.code === 'ERR_MISSING_NAME')
+  assert.throws(() => parseArgv(['save', '3000']), (err) => err.code === 'ERR_INVALID_ARGUMENTS')
 })
 
 test('save same name twice => DuplicateNameError', async () => {

@@ -16,7 +16,7 @@ export function formatProcessBlock(p, opts = {}) {
   const lines = [
     `  ${c.yellow('●')} port ${c.bold(String(p.port))}`,
     `    process   ${p.command}`,
-    `    pid       ${p.pid}`,
+    `    pid       ${p.pid ?? c.yellow('unavailable (try elevated privileges)')}`,
     `    protocol  ${p.protocol}/${p.family}`
   ]
   if (p.user) lines.push(`    user      ${p.user}`)
@@ -42,7 +42,7 @@ export function formatList(occupied, saved, opts = {}) {
       c.yellow('●'),
       String(p.port),
       p.command,
-      String(p.pid),
+      p.pid == null ? c.yellow('unknown') : String(p.pid),
       label
     ])
   }

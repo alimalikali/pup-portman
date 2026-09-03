@@ -31,7 +31,7 @@ export function createLinuxAdapter(exec) {
  */
 async function enrichFromProc(entries) {
   await Promise.all(entries.map(async (e) => {
-    if (e.pid > 0 && (!e.command || e.command === 'unknown')) {
+    if (e.pid != null && e.pid > 0 && (!e.command || e.command === 'unknown')) {
       try {
         const comm = (await readFile(`/proc/${e.pid}/comm`, 'utf8')).trim()
         if (comm.length > 0) e.command = comm

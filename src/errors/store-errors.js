@@ -25,3 +25,15 @@ export class DuplicateNameError extends PortmanError {
     })
   }
 }
+
+export class StoreLockTimeoutError extends PortmanError {
+  /** @param {string} path @param {number} timeoutMs */
+  constructor(path, timeoutMs) {
+    super(`Timed out waiting for project store lock at ${path}`, {
+      code: 'ERR_STORE_LOCK_TIMEOUT',
+      exitCode: EXIT_CODES.GENERAL,
+      userMessage: 'The project store is busy. Wait for the other pup-portman command to finish and retry.',
+      details: { path, timeoutMs }
+    })
+  }
+}

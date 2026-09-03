@@ -41,11 +41,15 @@ function listenOn(preferred) {
   })
 }
 
-test('inspect --json finds a port we just bound', { skip: isWindows /* netstat may take a beat to register */ }, async () => {
+test('inspect --json finds a port we just bound', { skip: isWindows /* netstat may take a beat to register */ }, async (t) => {
   /** @type {{ srv: import('node:net').Server, port: number }} */
   const { srv, port } = await listenOn(0)
   try {
     const r = await run([String(port), '--json'])
+    if (r.code === 5 && /not found on PATH/.test(r.stderr)) {
+      t.skip('required platform inspection tool is unavailable')
+      return
+    }
     assert.equal(r.code, 0)
     const out = JSON.parse(r.stdout)
     assert.equal(out.port, port)

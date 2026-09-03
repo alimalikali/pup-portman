@@ -4,7 +4,10 @@ import { formatProcessBlock } from '../ui/format.js'
 import { createColor, shouldUseColor } from '../ui/color.js'
 import { parsePort } from '../core/port.js'
 import { killProcess } from '../core/process-killer.js'
+import { waitForPortRelease } from '../core/port-release.js'
 import { PortNotFoundError, InvalidPortError } from '../errors/port-errors.js'
+import { PermissionDeniedError } from '../errors/permission-errors.js'
+import { PortmanError } from '../errors/base.js'
 
 /**
  * `pup-portman <port>` — show what's on a port and prompt to kill.
@@ -44,7 +47,12 @@ export async function inspect(parsed, ctx) {
   }
   print(ctx, '')
 
-  const proceed = await ctx.prompt(`kill ${processes.length === 1 ? `pid ${processes[0].pid}` : `${processes.length} processes`} on port ${port}?`, {
+  const actionable = processes.filter((p) => p.pid != null && p.pid > 0)
+  if (actionable.length === 0) {
+    throw new PermissionDeniedError(`identify the process listening on port ${port}`, { port })
+  }
+
+  const proceed = await ctx.prompt(`kill ${actionable.length === 1 ? `pid ${actionable[0].pid}` : `${actionable.length} processes`} on port ${port}?`, {
     default: false,
     assumeYes,
     input: ctx.stdin,
@@ -56,10 +64,19 @@ export async function inspect(parsed, ctx) {
     return EXIT_CODES.OK
   }
 
-  for (const p of processes) {
+  for (const p of actionable) {
+    if (p.pid == null) continue
     const result = await killProcess(p.pid, { platform: ctx.platform, exec: ctx.exec, force })
     const tag = result.escalated ? color.yellow(' (escalated to SIGKILL)') : ''
     print(ctx, color.green(`  ✓ killed pid ${result.pid}${tag}`))
+  }
+  const finalState = await waitForPortRelease(port, { adapter: ctx.adapter })
+  if (!finalState.free) {
+    throw new PortmanError(`Port ${port} is still occupied after termination`, {
+      code: 'ERR_PORT_STILL_IN_USE', exitCode: EXIT_CODES.GENERAL,
+      userMessage: `Signals were sent, but port ${port} is still occupied.`,
+      details: { port, remaining: finalState.processes }
+    })
   }
   print(ctx, color.green(`  port ${port} is free.`))
   return EXIT_CODES.OK
